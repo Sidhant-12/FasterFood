@@ -1,33 +1,72 @@
-import React from "react";
+import React, { useEffect, useRef, useState } from "react";
+import { useDispatchCart, useCart } from "./ContextReducer";
+export default function Card(props) {
 
-export default function Card() {
+  let dispatch = useDispatchCart();
+  let data = useCart();
+
+  let options = props.options;
+  let priceOptions = Object.keys(options)
+
+  let foodItem = props.foodItem;
+
+  const [qty, setQty] = useState(1);
+  const [size, setSize] = useState("");
+
+  const priceRef = useRef();
+
+  const handleAddToCart = async () => {
+    let existingCartItem = null;
+
+    for (const item of data) {
+      if (item.id === foodItem._id && item.size === size) {
+        existingCartItem = item;
+        break;
+      }
+    }
+
+    if (existingCartItem) {
+      await dispatch({ type: "UPDATE", id: existingCartItem.id, price: finalPrice, qty: qty });
+    } else {
+      await dispatch({ type: "ADD", id: foodItem._id, name: foodItem.name, price: finalPrice, qty: qty, size: size, img: props.ImgSrc });
+    }
+  }
+
+
+
+  let finalPrice = qty * parseInt(options[size]);
+  useEffect(() => {
+    setSize(priceRef.current.value)
+  }, [])
+
+
   return (
     <div>
       <div className="card mt-3" style={{ width: "18rem" }}>
-  <img
-    src="https://images.unsplash.com/photo-1567620832903-9fc6debc209f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1980&q=80"  // Replace with your image URL
-    className="card-img-top"
-    alt="Delicious Food"
-  />
-  <div className="card-body">
-    <h5 className="card-title">Card title</h5>
-    <p className="card-text">Some quick example text.</p>
-    <div className="container w-100">
-      <select className="m-2 h-100 bg-danger rounded">
-        {Array.from(Array(6), (e, i) => (
-          <option key={i + 1} value={i + 1}>
-            {i + 1}
-          </option>
-        ))}
-      </select>
-      <select className="m-2 h-100 bg-danger rounded">
-        <option value="half">Half</option>
-        <option value="full">Full</option>
-      </select>
-      <div className="d-inline h-100 fs-5">Total Price</div>
-    </div>
-  </div>
-</div>  
+        <img src={props.foodItem.img} className="card-img-top" alt="Delicious Food" style={{ height: "200px", objectFit: "fill" }} />
+        <div className="card-body" >
+          <h5 className="card-title fs-4 d-flex flex-row justify-content-center">{props.foodItem.name}</h5>
+          <div className="container w-100">
+            <select className="m-2 h-100 fs-6 bg-danger rounded" onChange={(e) => setQty(e.target.value)}>
+              {Array.from(Array(6), (e, i) => (
+                <option key={i + 1} value={i + 1}>
+                  {i + 1}
+                </option>
+              ))}
+            </select>
+            <select className="m-2 h-100 fs-6 bg-danger rounded" ref={priceRef} onChange={(e) => setSize(e.target.value)}>
+              {priceOptions.map((data) => {
+                return <option key={data} value={data}>{data}</option>
+              })}
+            </select>
+            <div className="d-inline m-2 h-100 fs-6 ">₹{finalPrice}/-</div>
+          </div>
+          <hr />
+          <div>
+            <button className="btn btn-danger ms-5 h-100 fs-6 bg-danger rounded" onClick={handleAddToCart}>Add to Cart</button>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

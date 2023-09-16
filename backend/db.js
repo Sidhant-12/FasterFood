@@ -5,13 +5,26 @@ const mongoDB =async()=>{
         console.log('Connected to MongoDB');
         const fetch_data = mongoose.connection.db.collection("food_items").find({})
         const results = await fetch_data.toArray();
+
         if (results.length > 0) {
-            results.forEach((result, i) => {
-                // console.log(result)
-            })
+          
+                global.food_items=results;
+          
+            // console.log(global.food)
         } else {
-            console.log(`No listings found`);
+            console.log(`No food items found`);
         }
+        
+        const fetchedfoodCategory = mongoose.connection.db.collection("foodCategory").find({})
+        const foodCat = await fetchedfoodCategory.toArray();
+        
+        if (foodCat.length > 0) {
+            global.foodCategory = foodCat
+
+        } else {
+            console.log(`No food categories found!`);
+        }
+
       })
       .catch((error) => {
         console.log('Error connecting to MongoDB:', error.message);
